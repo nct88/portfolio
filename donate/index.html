@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light" data-lang="vi" data-currency="VND">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ủng hộ truong.it</title>
+    <meta name="description" content="Ủng hộ truong.it - Mỗi đóng góp đều giúp tôi tiếp tục tạo ra những sản phẩm giá trị cho cộng đồng.">
+    <link rel="icon" type="image/png" href="../favicon.png">
+
+    <!-- Google Fonts - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="../" class="logo">truong<span>.it</span></a>
+            <div class="nav-right">
+                <div class="nav-toggles">
+                    <!-- Language Toggle -->
+                    <button class="pill-toggle" id="lang-toggle" aria-label="Chuyển ngôn ngữ">
+                        <span class="pill-option active" data-val="vi">VN</span>
+                        <span class="pill-option" data-val="en">EN</span>
+                    </button>
+                    <!-- Currency Toggle -->
+                    <button class="pill-toggle" id="currency-toggle" aria-label="Chuyển tiền tệ">
+                        <span class="pill-option active" data-val="VND">VNĐ</span>
+                        <span class="pill-option" data-val="USD">USD</span>
+                    </button>
+                    <!-- Theme Toggle -->
+                    <button class="icon-toggle" id="theme-toggle" aria-label="Chuyển chế độ sáng/tối">
+                        <i class="fas fa-moon" id="theme-icon"></i>
+                    </button>
+                </div>
+                <a href="../" class="back-link">
+                    <i class="fas fa-arrow-left"></i>
+                    <span data-i18n="nav_back">Trang chủ</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main -->
+    <main class="donate-page">
+        <div class="container">
+            <!-- Header -->
+            <div class="donate-header">
+                <div class="header-icon"><i class="fas fa-heart"></i></div>
+                <h1 data-i18n="title">Ủng hộ <span>truong.it</span></h1>
+                <p class="subtitle" data-i18n="subtitle">Mỗi đóng góp đều giúp tôi tiếp tục tạo ra những sản phẩm giá trị cho cộng đồng.</p>
+            </div>
+
+            <!-- Card -->
+            <div class="donate-card">
+                <!-- Step 1 -->
+                <div class="card-section">
+                    <div class="section-label">
+                        <span class="step-number">1</span>
+                        <span data-i18n="step1_label">Chọn số tiền ủng hộ</span>
+                    </div>
+                    <div class="amount-grid" id="amount-grid">
+                        <!-- Populated by JS based on currency -->
+                    </div>
+                    <div class="custom-amount-wrapper">
+                        <input type="number" id="custom-amount" data-i18n-placeholder="custom_amount_placeholder" placeholder="Nhập số tiền khác..." min="1000" step="1000">
+                    </div>
+                    <div class="amount-display">
+                        <span data-i18n="amount_label">Số tiền:</span>
+                        <span class="amount-value" id="amount-display">50,000₫</span>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="card-section">
+                    <div class="section-label">
+                        <span class="step-number">2</span>
+                        <span data-i18n="step2_label">Lời nhắn <em data-i18n="optional">(không bắt buộc)</em></span>
+                    </div>
+                    <input type="text" id="donor-message" class="text-input" data-i18n-placeholder="message_placeholder" placeholder="Gửi lời nhắn đến Trường..." maxlength="100">
+                </div>
+
+                <!-- Step 3 -->
+                <div class="card-section last">
+                    <div class="section-label">
+                        <span class="step-number">3</span>
+                        <span data-i18n="step3_label">Thanh toán qua SePay</span>
+                    </div>
+
+                    <div class="payment-methods">
+                        <div class="method-item">
+                            <i class="fas fa-qrcode"></i>
+                            <span>QR Banking</span>
+                        </div>
+                        <div class="method-item">
+                            <i class="fas fa-university"></i>
+                            <span data-i18n="method_transfer">Chuyển khoản</span>
+                        </div>
+                        <div class="method-item">
+                            <i class="fas fa-credit-card"></i>
+                            <span data-i18n="method_card">Thẻ quốc tế</span>
+                        </div>
+                    </div>
+
+                    <form id="sepay-form" method="POST" action=""></form>
+
+                    <button class="donate-btn" id="donate-btn" onclick="submitDonation()">
+                        <span class="btn-content" data-i18n="donate_btn">Ủng hộ ngay</span>
+                        <span class="btn-loader" style="display:none;">
+                            <i class="fas fa-spinner fa-spin"></i> <span data-i18n="processing">Đang xử lý...</span>
+                        </span>
+                    </button>
+
+                    <div class="security-note">
+                        <i class="fas fa-shield-halved"></i>
+                        <span data-i18n="security_note">Thanh toán bảo mật qua <strong>SePay</strong> — Chứng nhận ISO 27001</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trust -->
+            <div class="trust-section">
+                <div class="trust-item"><i class="fas fa-lock"></i> SSL</div>
+                <div class="trust-item"><i class="fas fa-certificate"></i> ISO 27001</div>
+                <div class="trust-item"><i class="fas fa-building-columns"></i> NAPAS</div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 truong.it · Powered by <a href="https://sepay.vn" target="_blank" rel="noopener">SePay</a></p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

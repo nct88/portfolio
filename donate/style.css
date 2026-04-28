@@ -1,0 +1,455 @@
+/* ===== Design Tokens ===== */
+:root {
+    --blue: #0088cc;
+    --blue-hover: #006da3;
+    --blue-light: rgba(0, 136, 204, 0.08);
+    --blue-border: rgba(0, 136, 204, 0.25);
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+    --transition: 0.2s ease;
+}
+
+/* ===== Light Theme ===== */
+[data-theme="light"] {
+    --bg-page: #f5f6f8;
+    --bg-card: #ffffff;
+    --bg-input: #f0f1f3;
+    --bg-input-focus: #e8e9ec;
+    --bg-nav: rgba(255, 255, 255, 0.85);
+    --text-primary: #111111;
+    --text-secondary: #5c5c5c;
+    --text-muted: #999999;
+    --border: #e2e2e2;
+    --border-active: var(--blue);
+    --shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
+    --shadow-btn: 0 2px 8px rgba(0,136,204,0.2);
+    --pill-bg: #e8e9ec;
+    --pill-active-bg: var(--blue);
+    --pill-active-text: #fff;
+    --pill-text: var(--text-secondary);
+}
+
+/* ===== Dark Theme ===== */
+[data-theme="dark"] {
+    --bg-page: #0e0e10;
+    --bg-card: #1a1a1e;
+    --bg-input: #222228;
+    --bg-input-focus: #2a2a32;
+    --bg-nav: rgba(14, 14, 16, 0.9);
+    --text-primary: #e8e8ea;
+    --text-secondary: #9a9aa0;
+    --text-muted: #5c5c62;
+    --border: #2a2a30;
+    --border-active: var(--blue);
+    --shadow-card: 0 1px 3px rgba(0,0,0,0.2), 0 4px 16px rgba(0,0,0,0.15);
+    --shadow-btn: 0 2px 12px rgba(0,136,204,0.25);
+    --pill-bg: #2a2a32;
+    --pill-active-bg: var(--blue);
+    --pill-active-text: #fff;
+    --pill-text: var(--text-secondary);
+}
+
+/* ===== Reset ===== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg-page);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+    transition: background var(--transition), color var(--transition);
+}
+
+.container { max-width: 560px; margin: 0 auto; padding: 0 1.25rem; }
+
+/* ===== Navbar ===== */
+.navbar {
+    position: fixed;
+    top: 0; left: 0; width: 100%;
+    z-index: 100;
+    padding: 0.6rem 0;
+    background: var(--bg-nav);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    transition: background var(--transition);
+}
+
+.nav-container {
+    max-width: 960px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-decoration: none;
+    letter-spacing: -0.5px;
+}
+.logo span { color: var(--blue); }
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.nav-toggles {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+/* ===== Pill Toggle (Language & Currency) ===== */
+.pill-toggle {
+    display: inline-flex;
+    align-items: center;
+    background: var(--pill-bg);
+    border: none;
+    border-radius: 20px;
+    padding: 2px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background var(--transition);
+}
+
+.pill-option {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 10px;
+    border-radius: 18px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--pill-text);
+    transition: all var(--transition);
+    -webkit-user-select: none;
+    user-select: none;
+    line-height: 1.4;
+}
+
+.pill-option.active {
+    background: var(--pill-active-bg);
+    color: var(--pill-active-text);
+}
+
+/* ===== Icon Toggle (Theme) ===== */
+.icon-toggle {
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--border);
+    background: var(--bg-input);
+    color: var(--text-secondary);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    transition: all var(--transition);
+}
+.icon-toggle:hover { border-color: var(--blue); color: var(--blue); }
+
+/* ===== Back Link ===== */
+.back-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 0.35rem 0;
+    border-radius: var(--radius-sm);
+    transition: color var(--transition);
+    width: 105px;
+    flex-shrink: 0;
+}
+.back-link:hover { color: var(--blue); }
+
+/* ===== Page ===== */
+.donate-page { padding: 90px 0 20px; }
+
+/* ===== Header ===== */
+.donate-header { text-align: center; margin-bottom: 2rem; }
+
+.header-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: var(--blue-light);
+    margin-bottom: 0.75rem;
+}
+.header-icon i { font-size: 1.3rem; color: var(--blue); }
+
+.donate-header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+    letter-spacing: -0.5px;
+}
+.donate-header h1 span { color: var(--blue); }
+
+.subtitle {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+/* ===== Card ===== */
+.donate-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-card);
+    transition: background var(--transition), border-color var(--transition);
+}
+
+/* ===== Sections ===== */
+.card-section {
+    margin-bottom: 1.25rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border);
+}
+.card-section.last { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+
+.section-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.85rem;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+.section-label em {
+    color: var(--text-muted);
+    font-weight: 400;
+    font-size: 0.75rem;
+}
+
+.step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--blue);
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+/* ===== Amount Grid ===== */
+.amount-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 0.6rem;
+}
+
+.amount-btn {
+    padding: 0.65rem;
+    border: 1px solid var(--border);
+    background: var(--bg-input);
+    color: var(--text-primary);
+    border-radius: var(--radius-md);
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition);
+}
+.amount-btn:hover { border-color: var(--blue-border); background: var(--blue-light); }
+.amount-btn.active { border-color: var(--blue); background: var(--blue-light); color: var(--blue); }
+
+/* ===== Inputs ===== */
+.custom-amount-wrapper { margin-bottom: 0.6rem; }
+
+.custom-amount-wrapper input,
+.text-input {
+    width: 100%;
+    padding: 0.65rem 0.85rem;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.85rem;
+    outline: none;
+    transition: all var(--transition);
+}
+.custom-amount-wrapper input:focus,
+.text-input:focus { border-color: var(--blue); background: var(--bg-input-focus); }
+.custom-amount-wrapper input::placeholder,
+.text-input::placeholder { color: var(--text-muted); }
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+
+/* ===== Amount Display ===== */
+.amount-display {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.65rem 0.85rem;
+    background: var(--blue-light);
+    border: 1px solid var(--blue-border);
+    border-radius: var(--radius-md);
+}
+.amount-display span:first-child { color: var(--text-secondary); font-size: 0.85rem; font-weight: 500; }
+.amount-value { font-size: 1.15rem; font-weight: 700; color: var(--blue); }
+
+/* ===== Payment Methods ===== */
+.payment-methods {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+.method-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.6rem 0.25rem;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    transition: all var(--transition);
+}
+.method-item i { font-size: 1rem; color: var(--blue); }
+.method-item span { font-size: 0.65rem; color: var(--text-secondary); font-weight: 500; }
+
+/* ===== Donate Button ===== */
+.donate-btn {
+    width: 100%;
+    padding: 0.8rem;
+    background: var(--blue);
+    border: none;
+    border-radius: var(--radius-md);
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition);
+    box-shadow: var(--shadow-btn);
+    margin-bottom: 0.6rem;
+}
+.donate-btn:hover { background: var(--blue-hover); }
+.donate-btn:active { transform: scale(0.99); }
+.donate-btn.loading .btn-content { display: none; }
+.donate-btn.loading .btn-loader { display: inline !important; }
+
+/* ===== Security & Trust ===== */
+.security-note {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+}
+.security-note i { color: var(--blue); font-size: 0.75rem; }
+
+.trust-section {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 5px;
+    padding: 0.5rem 0;
+}
+.trust-item {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+.trust-item i { font-size: 0.8rem; opacity: 0.5; }
+
+/* ===== Footer ===== */
+footer {
+    padding: 0.75rem 0;
+    text-align: center;
+    border-top: 1px solid var(--border);
+    margin-top: 0.5rem;
+    transition: border-color var(--transition);
+}
+footer p { color: var(--text-muted); font-size: 0.75rem; }
+footer a { color: var(--blue); text-decoration: none; font-weight: 500; }
+footer a:hover { text-decoration: underline; }
+
+/* ===== Toast ===== */
+.toast {
+    position: fixed;
+    top: 60px; left: 50%;
+    transform: translateX(-50%) translateY(-12px);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    padding: 0.65rem 1rem;
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: 0.8rem;
+    font-weight: 500;
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    box-shadow: var(--shadow-card);
+    max-width: 90vw;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+.toast.error { border-color: #e53935; }
+.toast.error i { color: #e53935; }
+.toast.success { border-color: #43a047; }
+.toast.success i { color: #43a047; }
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+    .donate-page { padding: 80px 0 16px; }
+    .donate-header { margin-bottom: 1.5rem; }
+    .donate-header h1 { font-size: 1.4rem; }
+    .subtitle { font-size: 0.85rem; }
+    .back-link { width: 90px; font-size: 0.75rem; }
+}
+
+@media (max-width: 600px) {
+    .donate-page { padding: 75px 0 12px; }
+    .donate-header h1 { font-size: 1.3rem; }
+    .donate-card { padding: 1.1rem; border-radius: 16px; }
+    .back-link span { display: none; }
+    .back-link { width: auto; min-width: 32px; }
+    .trust-section { gap: 1rem; }
+    .pill-option { padding: 3px 7px; font-size: 0.65rem; }
+    .nav-right { gap: 0.3rem; }
+    .icon-toggle { width: 28px; height: 28px; font-size: 0.7rem; }
+}
+
+@media (max-width: 360px) {
+    .container { padding: 0 0.75rem; }
+    .donate-card { padding: 0.9rem; }
+    .amount-grid { gap: 0.35rem; }
+    .amount-btn { padding: 0.5rem; font-size: 0.8rem; }
+    .payment-methods { gap: 0.35rem; }
+    .method-item { padding: 0.5rem 0.15rem; }
+    .pill-option { padding: 2px 6px; font-size: 0.6rem; }
+}
