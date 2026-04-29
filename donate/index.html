@@ -108,8 +108,6 @@
                         </div>
                     </div>
 
-                    <form id="sepay-form" method="POST" action=""></form>
-
                     <button class="donate-btn" id="donate-btn" onclick="submitDonation()">
                         <span class="btn-content" data-i18n="donate_btn">Ủng hộ ngay</span>
                         <span class="btn-loader" style="display:none;">
@@ -172,6 +170,75 @@
             <p>&copy; 2026 truong.it · Powered by <a href="https://sepay.vn" target="_blank" rel="noopener">SePay</a></p>
         </div>
     </footer>
+
+    <!-- Checkout Modal -->
+    <div class="checkout-overlay" id="checkout-overlay">
+        <div class="checkout-modal" id="checkout-modal">
+            <!-- Pending State -->
+            <div class="checkout-state" id="checkout-pending">
+                <button class="checkout-close" id="checkout-close" onclick="closeCheckout()">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="checkout-header">
+                    <div class="checkout-icon"><i class="fas fa-qrcode"></i></div>
+                    <h2 data-i18n="checkout_title">Quét mã để thanh toán</h2>
+                    <div class="checkout-timer" id="checkout-timer">
+                        <i class="fas fa-clock"></i>
+                        <span id="timer-text">15:00</span>
+                    </div>
+                </div>
+
+                <div class="checkout-qr">
+                    <div class="qr-glow"></div>
+                    <img id="checkout-qr-img" src="" alt="QR Code" />
+                    <div class="qr-loading" id="qr-loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </div>
+                </div>
+
+                <div class="checkout-amount-display" id="checkout-amount-display">0₫</div>
+
+                <div class="checkout-bank-info">
+                    <div class="bank-row">
+                        <span class="bank-label" data-i18n="bank_name">Ngân hàng</span>
+                        <span class="bank-value" id="bank-name">MB Bank</span>
+                    </div>
+                    <div class="bank-row">
+                        <span class="bank-label" data-i18n="bank_account">Số tài khoản</span>
+                        <span class="bank-value copyable" id="bank-account" onclick="copyText(this)">
+                            <span class="copy-text"></span>
+                            <i class="fas fa-copy"></i>
+                        </span>
+                    </div>
+                    <div class="bank-row">
+                        <span class="bank-label" data-i18n="bank_content">Nội dung CK</span>
+                        <span class="bank-value copyable highlight" id="bank-content" onclick="copyText(this)">
+                            <span class="copy-text"></span>
+                            <i class="fas fa-copy"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="checkout-status" id="checkout-status">
+                    <div class="status-pulse"></div>
+                    <span data-i18n="waiting_payment">Đang chờ thanh toán...</span>
+                </div>
+            </div>
+
+            <!-- Success State -->
+            <div class="checkout-state checkout-success-state" id="checkout-success" style="display:none;">
+                <div class="success-animation">
+                    <div class="success-circle">
+                        <i class="fas fa-check"></i>
+                    </div>
+                </div>
+                <h2 data-i18n="payment_success">Thanh toán thành công!</h2>
+                <p class="success-subtitle" data-i18n="payment_thanks">Cảm ơn bạn đã ủng hộ truong.it</p>
+                <div class="success-amount" id="success-amount">0₫</div>
+                <button class="donate-btn" onclick="closeCheckout()" data-i18n="close_btn">Đóng</button>
+            </div>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>

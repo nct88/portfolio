@@ -1,34 +1,17 @@
 // ============================================================
-// SePay Payment Gateway — Configuration
+// SePay Custom Checkout — Configuration
 // ============================================================
-const SEPAY_CONFIG = {
-    env: 'production',
-    merchant_id: 'SP-LIVE-NC3A9466',
-    checkout_url: {
-        sandbox: 'https://sandbox.pay.sepay.vn/v1/checkout/init',
-        production: 'https://pay.sepay.vn/v1/checkout/init'
-    },
-    success_url: 'https://d.truong.it/donate/?status=success',
-    error_url: 'https://d.truong.it/donate/?status=error',
-    cancel_url: 'https://d.truong.it/donate/?status=cancel'
+const BANK_CONFIG = {
+    bank: 'MBBank',
+    account: '0359364985207',
+    name: 'NGUYEN CONG TRUONG',
+    display_name: 'MB Bank'
 };
 
 // ============================================================
-// Cloudflare Worker URL — Cập nhật sau khi deploy worker
+// Cloudflare Worker URL
 // ============================================================
 const WORKER_URL = 'https://donate-api.truong-it.workers.dev';
-
-// ============================================================
-// Encrypted Secret Key (XOR cipher)
-// ============================================================
-const _a = [39, 2, 6, 4, 49, 11, 32, 34, 87, 79, 75, 76, 29, 36, 3, 88, 63, 22, 69, 36, 22, 7, 38, 60, 24, 67, 20, 127, 7, 6, 86, 38, 85, 61, 12, 51, 66, 59, 8, 80, 24, 98];
-const _k1 = 'Truong';
-const _k2 = 'IT2026';
-const _k3 = 'SePay';
-function _d() {
-    const k = _k1 + _k2 + _k3;
-    return _a.map((c, i) => String.fromCharCode(c ^ k.charCodeAt(i % k.length))).join('');
-}
 
 // ============================================================
 // i18n — Translations
@@ -65,7 +48,17 @@ const TRANSLATIONS = {
         time_just_now: 'Vừa xong',
         time_minutes_ago: 'phút trước',
         time_hours_ago: 'giờ trước',
-        time_days_ago: 'ngày trước'
+        time_days_ago: 'ngày trước',
+        checkout_title: 'Quét mã để thanh toán',
+        bank_name: 'Ngân hàng',
+        bank_account: 'Số tài khoản',
+        bank_content: 'Nội dung CK',
+        waiting_payment: 'Đang chờ thanh toán...',
+        payment_success: 'Thanh toán thành công!',
+        payment_thanks: 'Cảm ơn bạn đã ủng hộ truong.it',
+        close_btn: 'Đóng',
+        copied: 'Đã sao chép!',
+        expired: 'Hết thời gian thanh toán'
     },
     en: {
         page_title: 'Support truong.it',
@@ -98,7 +91,17 @@ const TRANSLATIONS = {
         time_just_now: 'Just now',
         time_minutes_ago: 'min ago',
         time_hours_ago: 'hr ago',
-        time_days_ago: 'days ago'
+        time_days_ago: 'days ago',
+        checkout_title: 'Scan to pay',
+        bank_name: 'Bank',
+        bank_account: 'Account No.',
+        bank_content: 'Transfer note',
+        waiting_payment: 'Waiting for payment...',
+        payment_success: 'Payment successful!',
+        payment_thanks: 'Thank you for supporting truong.it',
+        close_btn: 'Close',
+        copied: 'Copied!',
+        expired: 'Payment expired'
     }
 };
 
@@ -130,6 +133,9 @@ const CURRENCY_PRESETS = {
 let selectedAmount = 50000;
 let currentLang = 'vi';
 let currentCurrency = 'VND';
+let checkoutPollTimer = null;
+let checkoutCountdownTimer = null;
+let currentOrderCode = null;
 
 // ============================================================
 // Theme
@@ -281,51 +287,19 @@ function updateAmountDisplay() {
 }
 
 // ============================================================
-// HMAC-SHA256 Signature
+// Generate Payment Code (local)
 // ============================================================
-async function generateSignature(fields) {
-    const signableFields = [
-        'merchant', 'env', 'operation', 'payment_method',
-        'order_amount', 'currency', 'order_invoice_number',
-        'order_description', 'customer_id',
-        'agreement_id', 'agreement_name', 'agreement_type',
-        'agreement_payment_frequency', 'agreement_amount_per_payment',
-        'success_url', 'error_url', 'cancel_url', 'order_id'
-    ];
-
-    const parts = [];
-    for (const key of signableFields) {
-        if (fields[key] !== undefined && fields[key] !== null) {
-            parts.push(`${key}=${fields[key] ?? ''}`);
-        }
+function generatePaymentCode() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = 'DN';
+    for (let i = 0; i < 6; i++) {
+        code += chars[Math.floor(Math.random() * chars.length)];
     }
-
-    const dataToSign = parts.join(',');
-    const secretKey = _d();
-    const encoder = new TextEncoder();
-
-    const cryptoKey = await crypto.subtle.importKey(
-        'raw', encoder.encode(secretKey),
-        { name: 'HMAC', hash: 'SHA-256' },
-        false, ['sign']
-    );
-
-    const sigBuffer = await crypto.subtle.sign('HMAC', cryptoKey, encoder.encode(dataToSign));
-    const sigArray = new Uint8Array(sigBuffer);
-    let binary = '';
-    for (let i = 0; i < sigArray.length; i++) binary += String.fromCharCode(sigArray[i]);
-    return btoa(binary);
+    return code;
 }
 
 // ============================================================
-// Invoice Number
-// ============================================================
-function generateInvoiceNumber() {
-    return `DONATE-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-}
-
-// ============================================================
-// Submit Donation
+// Submit Donation — Custom Checkout Flow
 // ============================================================
 async function submitDonation() {
     const t = TRANSLATIONS[currentLang];
@@ -343,48 +317,162 @@ async function submitDonation() {
     donateBtn.disabled = true;
 
     try {
-        const message = document.getElementById('donor-message').value.trim();
-        const description = message
-            ? `Donate truong.it - ${message}`
-            : 'Donate ung ho truong.it';
+        const code = generatePaymentCode();
+        const amount = parseInt(selectedAmount);
 
-        const fields = {
-            merchant: SEPAY_CONFIG.merchant_id,
-            operation: 'PURCHASE',
-            order_invoice_number: generateInvoiceNumber(),
-            order_amount: selectedAmount,
-            currency: currentCurrency,
-            order_description: description,
-            success_url: SEPAY_CONFIG.success_url,
-            error_url: SEPAY_CONFIG.error_url,
-            cancel_url: SEPAY_CONFIG.cancel_url
-        };
-
-        const signature = await generateSignature(fields);
-        const form = document.getElementById('sepay-form');
-        form.action = SEPAY_CONFIG.checkout_url[SEPAY_CONFIG.env];
-        form.innerHTML = '';
-
-        for (const [key, value] of Object.entries({ ...fields, signature })) {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = key;
-            input.value = value;
-            form.appendChild(input);
-        }
-
-        form.submit();
+        // Mở checkout modal trực tiếp (không cần gọi server)
+        openCheckout({ code, amount });
     } catch (error) {
-        console.error('Payment error:', error.message, error.stack);
-        // crypto.subtle requires HTTPS
-        if (!window.crypto || !window.crypto.subtle) {
-            showToast('Vui lòng truy cập qua HTTPS', 'error');
-        } else {
-            showToast(t.toast_generic_error, 'error');
-        }
+        console.error('Payment error:', error);
+        showToast(t.toast_generic_error, 'error');
+    } finally {
         donateBtn.classList.remove('loading');
         donateBtn.disabled = false;
     }
+}
+
+// ============================================================
+// Checkout Modal
+// ============================================================
+function openCheckout(order) {
+    currentOrderCode = order.code;
+    const preset = CURRENCY_PRESETS[currentCurrency];
+
+    // QR Code via SePay QR API
+    const qrUrl = `https://qr.sepay.vn/img?acc=${BANK_CONFIG.account}&bank=${BANK_CONFIG.bank}&amount=${order.amount}&des=${encodeURIComponent(order.code)}`;
+    const qrImg = document.getElementById('checkout-qr-img');
+    const qrLoading = document.getElementById('qr-loading');
+
+    qrLoading.classList.remove('hidden');
+    qrImg.onload = () => qrLoading.classList.add('hidden');
+    qrImg.onerror = () => qrLoading.classList.add('hidden');
+    qrImg.src = qrUrl;
+
+    // Amount display
+    document.getElementById('checkout-amount-display').textContent = preset.format(order.amount);
+
+    // Bank info
+    document.getElementById('bank-name').textContent = BANK_CONFIG.display_name;
+    document.querySelector('#bank-account .copy-text').textContent = BANK_CONFIG.account;
+    document.querySelector('#bank-content .copy-text').textContent = order.code;
+
+    // Show pending, hide success
+    document.getElementById('checkout-pending').style.display = '';
+    document.getElementById('checkout-success').style.display = 'none';
+
+    // Open overlay
+    const overlay = document.getElementById('checkout-overlay');
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+
+    // Start countdown (15 min)
+    startCountdown(15 * 60);
+
+    // Start polling — dùng SePay API qua Worker
+    startPolling(order.code, order.amount);
+}
+
+function closeCheckout() {
+    const overlay = document.getElementById('checkout-overlay');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+    currentOrderCode = null;
+    stopPolling();
+    stopCountdown();
+}
+
+// ============================================================
+// Countdown Timer
+// ============================================================
+let countdownRemaining = 0;
+
+function startCountdown(seconds) {
+    stopCountdown();
+    countdownRemaining = seconds;
+    updateTimerDisplay();
+
+    checkoutCountdownTimer = setInterval(() => {
+        countdownRemaining--;
+        updateTimerDisplay();
+
+        if (countdownRemaining <= 0) {
+            stopCountdown();
+            stopPolling();
+            const t = TRANSLATIONS[currentLang];
+            showToast(t.expired, 'error');
+            closeCheckout();
+        }
+    }, 1000);
+}
+
+function stopCountdown() {
+    if (checkoutCountdownTimer) {
+        clearInterval(checkoutCountdownTimer);
+        checkoutCountdownTimer = null;
+    }
+}
+
+function updateTimerDisplay() {
+    const min = Math.floor(countdownRemaining / 60);
+    const sec = countdownRemaining % 60;
+    const text = `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+    document.getElementById('timer-text').textContent = text;
+
+    const timerEl = document.getElementById('checkout-timer');
+    if (countdownRemaining <= 120) {
+        timerEl.classList.add('urgent');
+    } else {
+        timerEl.classList.remove('urgent');
+    }
+}
+
+// ============================================================
+// Payment Polling
+// ============================================================
+function startPolling(code, amount) {
+    stopPolling();
+    checkoutPollTimer = setInterval(async () => {
+        try {
+            const res = await fetch(`${WORKER_URL}/check?code=${encodeURIComponent(code)}&amount=${amount}`);
+            const data = await res.json();
+
+            if (data.status === 'paid') {
+                stopPolling();
+                stopCountdown();
+                showPaymentSuccess();
+            }
+        } catch (err) {
+            console.warn('Poll error:', err);
+        }
+    }, 5000); // Poll every 5 seconds
+}
+
+function stopPolling() {
+    if (checkoutPollTimer) {
+        clearInterval(checkoutPollTimer);
+        checkoutPollTimer = null;
+    }
+}
+
+function showPaymentSuccess() {
+    const preset = CURRENCY_PRESETS[currentCurrency];
+    document.getElementById('checkout-pending').style.display = 'none';
+    document.getElementById('checkout-success').style.display = '';
+    document.getElementById('success-amount').textContent = preset.format(selectedAmount);
+
+    // Refresh donor list after delay
+    setTimeout(() => loadDonors(), 2000);
+}
+
+// ============================================================
+// Copy to Clipboard
+// ============================================================
+function copyText(el) {
+    const text = el.querySelector('.copy-text')?.textContent || el.textContent;
+    navigator.clipboard.writeText(text.trim()).then(() => {
+        const t = TRANSLATIONS[currentLang];
+        showToast(t.copied, 'success');
+    });
 }
 
 // ============================================================
@@ -408,7 +496,7 @@ function showToast(message, type = 'info') {
 }
 
 // ============================================================
-// Callback Status
+// Callback Status (legacy support)
 // ============================================================
 function handleCallbackStatus() {
     const params = new URLSearchParams(window.location.search);
@@ -451,6 +539,18 @@ document.addEventListener('DOMContentLoaded', () => {
     rebuildAmountGrid();
     handleCallbackStatus();
     loadDonors();
+
+    // Close checkout on overlay click
+    document.getElementById('checkout-overlay').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) closeCheckout();
+    });
+
+    // Close on Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && document.getElementById('checkout-overlay').classList.contains('active')) {
+            closeCheckout();
+        }
+    });
 });
 
 // ============================================================
@@ -486,6 +586,8 @@ function extractDonorName(content) {
     cleaned = cleaned.replace(/^(CT |CK |TT |IBFT |FAST )/i, '').trim();
     // Remove long number sequences
     cleaned = cleaned.replace(/\d{6,}/g, '').trim();
+    // Remove DONATE- codes
+    cleaned = cleaned.replace(/DONATE-?[A-Z0-9]{4,}/gi, '').trim();
     // Remove extra whitespace
     cleaned = cleaned.replace(/\s+/g, ' ').trim();
     return cleaned || t.donor_anonymous;
@@ -668,7 +770,3 @@ function initAutoScroll() {
 
     requestAnimationFrame(tick);
 }
-
-
-
-

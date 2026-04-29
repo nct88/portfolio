@@ -696,3 +696,211 @@ footer a:hover { text-decoration: underline; }
     font-size: 0.85rem;
 }
 
+/* ===== Checkout Modal ===== */
+.checkout-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.6);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    padding: 1rem;
+}
+.checkout-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.checkout-modal {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 24px 64px rgba(0,0,0,0.2);
+    max-width: 420px;
+    width: 100%;
+    padding: 1.75rem;
+    position: relative;
+    transform: translateY(20px) scale(0.97);
+    transition: transform 0.3s ease;
+}
+.checkout-overlay.active .checkout-modal {
+    transform: translateY(0) scale(1);
+}
+
+.checkout-close {
+    position: absolute;
+    top: 0.75rem; right: 0.75rem;
+    width: 32px; height: 32px;
+    border: 1px solid var(--border);
+    background: var(--bg-input);
+    color: var(--text-secondary);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    transition: all var(--transition);
+    z-index: 2;
+}
+.checkout-close:hover { border-color: #e53935; color: #e53935; }
+
+.checkout-header { text-align: center; margin-bottom: 1.25rem; }
+.checkout-icon {
+    display: inline-flex;
+    align-items: center; justify-content: center;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: var(--blue-light);
+    margin-bottom: 0.5rem;
+}
+.checkout-icon i { font-size: 1.2rem; color: var(--blue); }
+.checkout-header h2 {
+    font-size: 1.1rem; font-weight: 700;
+    letter-spacing: -0.3px; margin-bottom: 0.4rem;
+}
+
+.checkout-timer {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.78rem; font-weight: 600;
+    color: var(--text-secondary);
+}
+.checkout-timer i { font-size: 0.7rem; color: var(--blue); }
+.checkout-timer.urgent { color: #e53935; border-color: rgba(229,57,53,0.3); }
+.checkout-timer.urgent i { color: #e53935; }
+
+/* QR Code */
+.checkout-qr {
+    position: relative;
+    display: flex;
+    align-items: center; justify-content: center;
+    margin: 0 auto 1rem;
+    width: 200px; height: 200px;
+    border-radius: var(--radius-md);
+    background: #fff;
+    padding: 8px;
+}
+.qr-glow {
+    position: absolute; inset: -3px;
+    border-radius: calc(var(--radius-md) + 3px);
+    background: linear-gradient(135deg, var(--blue), #00c6ff, var(--blue));
+    background-size: 200% 200%;
+    animation: qrGlow 3s ease infinite;
+    z-index: -1;
+}
+@keyframes qrGlow {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+.checkout-qr img {
+    width: 100%; height: 100%;
+    object-fit: contain;
+    border-radius: 6px;
+}
+.qr-loading {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: #fff;
+    border-radius: var(--radius-md);
+    font-size: 1.5rem;
+    color: var(--blue);
+}
+.qr-loading.hidden { display: none; }
+
+.checkout-amount-display {
+    text-align: center;
+    font-size: 1.5rem; font-weight: 700;
+    color: var(--blue);
+    margin-bottom: 1rem;
+    letter-spacing: -0.5px;
+}
+
+/* Bank Info */
+.checkout-bank-info {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 0.1rem 0;
+    margin-bottom: 1rem;
+}
+.bank-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0.55rem 0.85rem;
+}
+.bank-row + .bank-row { border-top: 1px solid var(--border); }
+.bank-label { font-size: 0.78rem; color: var(--text-muted); font-weight: 500; }
+.bank-value {
+    font-size: 0.82rem; font-weight: 600;
+    color: var(--text-primary);
+    display: flex; align-items: center; gap: 0.4rem;
+}
+.bank-value.copyable {
+    cursor: pointer; transition: color var(--transition);
+}
+.bank-value.copyable:hover { color: var(--blue); }
+.bank-value.copyable i { font-size: 0.65rem; color: var(--text-muted); transition: color var(--transition); }
+.bank-value.copyable:hover i { color: var(--blue); }
+.bank-value.highlight .copy-text { color: var(--blue); }
+
+/* Status */
+.checkout-status {
+    display: flex; align-items: center; justify-content: center;
+    gap: 0.5rem;
+    padding: 0.6rem;
+    background: var(--blue-light);
+    border: 1px solid var(--blue-border);
+    border-radius: var(--radius-md);
+    font-size: 0.8rem; font-weight: 500;
+    color: var(--text-secondary);
+}
+.status-pulse {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--blue);
+    animation: pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+}
+
+/* Success State */
+.checkout-success-state { text-align: center; padding: 2rem 1rem; }
+.success-animation { margin-bottom: 1.25rem; }
+.success-circle {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #43a047, #66bb6a);
+    display: inline-flex; align-items: center; justify-content: center;
+    animation: successPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+.success-circle i { font-size: 1.8rem; color: #fff; }
+@keyframes successPop {
+    0% { transform: scale(0); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+.checkout-success-state h2 {
+    font-size: 1.2rem; font-weight: 700; margin-bottom: 0.3rem;
+    color: #43a047;
+}
+.success-subtitle { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.75rem; }
+.success-amount {
+    font-size: 1.6rem; font-weight: 700; color: var(--blue);
+    margin-bottom: 1.25rem;
+}
+
+@media (max-width: 600px) {
+    .checkout-modal { padding: 1.25rem; border-radius: 16px; }
+    .checkout-qr { width: 170px; height: 170px; }
+    .checkout-amount-display { font-size: 1.3rem; }
+}
