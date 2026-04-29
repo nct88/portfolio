@@ -442,6 +442,8 @@ footer a:hover { text-decoration: underline; }
     .pill-option { padding: 3px 7px; font-size: 0.65rem; }
     .nav-right { gap: 0.3rem; }
     .icon-toggle { width: 28px; height: 28px; font-size: 0.7rem; }
+    .donors-stats { gap: 0.5rem; }
+    .stat-value { font-size: 1.1rem; }
 }
 
 @media (max-width: 360px) {
@@ -453,3 +455,204 @@ footer a:hover { text-decoration: underline; }
     .method-item { padding: 0.5rem 0.15rem; }
     .pill-option { padding: 2px 6px; font-size: 0.6rem; }
 }
+
+/* ===== Donors Section ===== */
+.donors-section {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+}
+
+.donors-header {
+    text-align: center;
+    margin-bottom: 1.25rem;
+}
+
+.donors-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(0,136,204,0.12), rgba(0,136,204,0.04));
+    margin-bottom: 0.5rem;
+}
+.donors-icon i { font-size: 1.1rem; color: var(--blue); }
+
+.donors-header h2 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 0.2rem;
+}
+
+.donors-subtitle {
+    color: var(--text-muted);
+    font-size: 0.78rem;
+}
+
+/* Stats */
+.donors-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.65rem;
+    margin-bottom: 1rem;
+}
+
+.stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 0.85rem 0.75rem;
+    text-align: center;
+    box-shadow: var(--shadow-card);
+    transition: all var(--transition);
+}
+
+.stat-value {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--blue);
+    letter-spacing: -0.5px;
+}
+
+.stat-label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-top: 0.15rem;
+}
+
+/* Donor list */
+.donors-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.donor-item {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.7rem 0.85rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    transition: all var(--transition);
+    animation: fadeInUp 0.3s ease forwards;
+    opacity: 0;
+}
+.donor-item:hover {
+    border-color: var(--blue-border);
+    transform: translateY(-1px);
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.donor-avatar {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.75rem;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.donor-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.donor-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.donor-time {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+}
+
+.donor-amount {
+    font-weight: 700;
+    color: var(--blue);
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+/* Skeleton loading */
+@keyframes shimmer {
+    0% { background-position: -200px 0; }
+    100% { background-position: 200px 0; }
+}
+
+.donor-skeleton {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.7rem 0.85rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+}
+
+.skeleton-avatar {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(90deg, var(--bg-input) 25%, var(--bg-input-focus) 50%, var(--bg-input) 75%);
+    background-size: 400px 100%;
+    animation: shimmer 1.2s ease-in-out infinite;
+    flex-shrink: 0;
+}
+
+.skeleton-lines {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.skeleton-line {
+    height: 10px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--bg-input) 25%, var(--bg-input-focus) 50%, var(--bg-input) 75%);
+    background-size: 400px 100%;
+    animation: shimmer 1.2s ease-in-out infinite;
+}
+.skeleton-line.w60 { width: 60%; }
+.skeleton-line.w40 { width: 40%; }
+
+.skeleton-amount {
+    width: 55px; height: 14px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--bg-input) 25%, var(--bg-input-focus) 50%, var(--bg-input) 75%);
+    background-size: 400px 100%;
+    animation: shimmer 1.2s ease-in-out infinite;
+    flex-shrink: 0;
+}
+
+/* Empty state */
+.donors-empty {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--text-muted);
+}
+.donors-empty i {
+    font-size: 2rem;
+    opacity: 0.3;
+    margin-bottom: 0.5rem;
+}
+.donors-empty p {
+    font-size: 0.85rem;
+}
+

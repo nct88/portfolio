@@ -14,6 +14,11 @@ const SEPAY_CONFIG = {
 };
 
 // ============================================================
+// Cloudflare Worker URL — Cập nhật sau khi deploy worker
+// ============================================================
+const WORKER_URL = 'https://donate-api.truong-it.workers.dev';
+
+// ============================================================
 // Encrypted Secret Key (XOR cipher)
 // ============================================================
 const _a = [39,2,6,4,49,11,32,34,87,79,75,76,29,36,3,88,63,22,69,36,22,7,38,60,24,67,20,127,7,6,86,38,85,61,12,51,66,59,8,80,24,98];
@@ -50,7 +55,17 @@ const TRANSLATIONS = {
         toast_error: 'Giao dịch thất bại. Vui lòng thử lại.',
         toast_cancel: 'Bạn đã hủy giao dịch.',
         toast_min_amount: 'Vui lòng chọn hoặc nhập số tiền tối thiểu',
-        toast_generic_error: 'Có lỗi xảy ra, vui lòng thử lại'
+        toast_generic_error: 'Có lỗi xảy ra, vui lòng thử lại',
+        donors_title: 'Những người ủng hộ',
+        donors_subtitle: 'Cảm ơn tất cả những tấm lòng hảo tâm!',
+        stat_total: 'Tổng ủng hộ',
+        stat_donors: 'Lượt ủng hộ',
+        donors_empty: 'Hãy là người đầu tiên ủng hộ!',
+        donor_anonymous: 'Nhà hảo tâm',
+        time_just_now: 'Vừa xong',
+        time_minutes_ago: 'phút trước',
+        time_hours_ago: 'giờ trước',
+        time_days_ago: 'ngày trước'
     },
     en: {
         page_title: 'Support truong.it',
@@ -73,7 +88,17 @@ const TRANSLATIONS = {
         toast_error: 'Transaction failed. Please try again.',
         toast_cancel: 'Transaction cancelled.',
         toast_min_amount: 'Please select or enter minimum amount',
-        toast_generic_error: 'An error occurred, please try again'
+        toast_generic_error: 'An error occurred, please try again',
+        donors_title: 'Supporters',
+        donors_subtitle: 'Thank you to all our generous supporters!',
+        stat_total: 'Total raised',
+        stat_donors: 'Donations',
+        donors_empty: 'Be the first to donate!',
+        donor_anonymous: 'Supporter',
+        time_just_now: 'Just now',
+        time_minutes_ago: 'min ago',
+        time_hours_ago: 'hr ago',
+        time_days_ago: 'days ago'
     }
 };
 
@@ -420,4 +445,126 @@ document.addEventListener('DOMContentLoaded', () => {
     applyTranslations();
     rebuildAmountGrid();
     handleCallbackStatus();
+    loadDonors();
 });
+
+// ============================================================
+// Donors Wall
+// ============================================================
+const AVATAR_COLORS = [
+    '#0088cc', '#e53935', '#43a047', '#fb8c00',
+    '#8e24aa', '#00897b', '#3949ab', '#d81b60'
+];
+
+function getAvatarColor(index) {
+    return AVATAR_COLORS[index % AVATAR_COLORS.length];
+}
+
+function timeAgo(dateStr) {
+    const t = TRANSLATIONS[currentLang];
+    const now = new Date();
+    const date = new Date(dateStr.replace(' ', 'T') + '+07:00');
+    const diff = Math.floor((now - date) / 1000);
+
+    if (diff < 60) return t.time_just_now;
+    if (diff < 3600) return Math.floor(diff / 60) + ' ' + t.time_minutes_ago;
+    if (diff < 86400) return Math.floor(diff / 3600) + ' ' + t.time_hours_ago;
+    return Math.floor(diff / 86400) + ' ' + t.time_days_ago;
+}
+
+function extractDonorName(content) {
+    const t = TRANSLATIONS[currentLang];
+    if (!content) return t.donor_anonymous;
+    // Remove SePay payment references (PAYxxxxx patterns)
+    let cleaned = content.replace(/PAY[A-Za-z0-9]+/gi, '').trim();
+    // Remove common bank prefixes
+    cleaned = cleaned.replace(/^(CT |CK |TT |IBFT |FAST )/i, '').trim();
+    // Remove long number sequences
+    cleaned = cleaned.replace(/\d{6,}/g, '').trim();
+    // Remove extra whitespace
+    cleaned = cleaned.replace(/\s+/g, ' ').trim();
+    return cleaned || t.donor_anonymous;
+}
+
+function formatDonorAmount(amount) {
+    return new Intl.NumberFormat('vi-VN').format(amount) + '₫';
+}
+
+function renderDonors(donors) {
+    const list = document.getElementById('donors-list');
+    const empty = document.getElementById('donors-empty');
+
+    list.innerHTML = '';
+
+    if (!donors || donors.length === 0) {
+        empty.style.display = 'block';
+        return;
+    }
+
+    empty.style.display = 'none';
+
+    donors.forEach((donor, i) => {
+        const name = extractDonorName(donor.content);
+        const initial = name.charAt(0).toUpperCase();
+        const color = getAvatarColor(i);
+        const time = timeAgo(donor.date);
+        const amount = formatDonorAmount(donor.amount);
+
+        const item = document.createElement('div');
+        item.className = 'donor-item';
+        item.style.animationDelay = `${i * 0.05}s`;
+        item.innerHTML = `
+            <div class="donor-avatar" style="background:${color}">${initial}</div>
+            <div class="donor-info">
+                <div class="donor-name">${escapeHtml(name)}</div>
+                <div class="donor-time">${time}</div>
+            </div>
+            <div class="donor-amount">${amount}</div>
+        `;
+        list.appendChild(item);
+    });
+}
+
+function updateDonorStats(stats) {
+    const amountEl = document.getElementById('stat-total-amount');
+    const countEl = document.getElementById('stat-total-donors');
+
+    if (stats.total_amount !== undefined) {
+        amountEl.textContent = formatDonorAmount(stats.total_amount);
+    }
+    if (stats.total_count !== undefined) {
+        countEl.textContent = stats.total_count;
+    }
+}
+
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+async function loadDonors() {
+    if (!WORKER_URL) {
+        // Worker chưa được cấu hình — ẩn section
+        const section = document.getElementById('donors-section');
+        if (section) section.style.display = 'none';
+        return;
+    }
+
+    try {
+        const res = await fetch(WORKER_URL + '?limit=100');
+        const data = await res.json();
+
+        if (data.status === 'success') {
+            updateDonorStats(data.stats);
+            renderDonors(data.donors);
+        } else {
+            document.getElementById('donors-list').innerHTML = '';
+            document.getElementById('donors-empty').style.display = 'block';
+        }
+    } catch (err) {
+        console.error('Failed to load donors:', err);
+        document.getElementById('donors-list').innerHTML = '';
+        document.getElementById('donors-empty').style.display = 'block';
+    }
+}
