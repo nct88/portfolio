@@ -19,3 +19,9 @@ Mẫu landing page cao cấp được thiết kế dựa trên thông tin từ `
 - Sticky Navbar mượt mà
 - Marquee trượt ngang hiện đại
 - Form liên hệ phong cách Glassmorphism
+
+---
+
+### ❤️ Ủng hộ
+
+Nếu bạn thấy dự án hữu ích, hãy cân nhắc [ủng hộ truong.it](https://congtruongitvn.github.io/truong-it-portfolio/donate/) để tôi tiếp tục tạo ra những sản phẩm giá trị cho cộng đồng.
