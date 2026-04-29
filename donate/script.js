@@ -8,9 +8,9 @@ const SEPAY_CONFIG = {
         sandbox: 'https://sandbox.pay.sepay.vn/v1/checkout/init',
         production: 'https://pay.sepay.vn/v1/checkout/init'
     },
-    success_url: 'https://nct88.github.io/portfolio/donate/?status=success',
-    error_url: 'https://nct88.github.io/portfolio/donate/?status=error',
-    cancel_url: 'https://nct88.github.io/portfolio/donate/?status=cancel'
+    success_url: 'https://d.truong.it/donate/?status=success',
+    error_url: 'https://d.truong.it/donate/?status=error',
+    cancel_url: 'https://d.truong.it/donate/?status=cancel'
 };
 
 // ============================================================
@@ -375,8 +375,13 @@ async function submitDonation() {
 
         form.submit();
     } catch (error) {
-        console.error('Payment error:', error);
-        showToast(t.toast_generic_error, 'error');
+        console.error('Payment error:', error.message, error.stack);
+        // crypto.subtle requires HTTPS
+        if (!window.crypto || !window.crypto.subtle) {
+            showToast('Vui lòng truy cập qua HTTPS', 'error');
+        } else {
+            showToast(t.toast_generic_error, 'error');
+        }
         donateBtn.classList.remove('loading');
         donateBtn.disabled = false;
     }
