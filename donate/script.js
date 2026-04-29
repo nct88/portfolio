@@ -2,10 +2,10 @@
 // SePay Custom Checkout — Configuration
 // ============================================================
 const BANK_CONFIG = {
-    bank: 'MBBank',
-    account: '0359364985207',
+    bank: 'KienLongBank',
+    account: '101499100004603694',
     name: 'NGUYEN CONG TRUONG',
-    display_name: 'MB Bank'
+    display_name: 'KienLongBank'
 };
 
 // ============================================================
