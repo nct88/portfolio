@@ -951,15 +951,9 @@ function openBankApp(bank) {
     const amount = parseInt(selectedAmount);
     const content = currentOrderCode || '';
 
-    // Build VietQR deep link URL — always pass transfer info
-    const params = new URLSearchParams({
-        app: bank.appId,
-        ba: BANK_CONFIG.account,
-        am: amount.toString(),
-        tn: content
-    });
-
-    const deepLinkUrl = `https://dl.vietqr.io/pay?${params.toString()}`;
+    // Build VietQR deep link URL — full params to open transfer screen
+    // bn (beneficiary name) is critical for banks to show the transfer form
+    const deepLinkUrl = `https://dl.vietqr.io/pay?app=${encodeURIComponent(bank.appId)}&ba=${encodeURIComponent(BANK_CONFIG.account)}&am=${amount}&tn=${encodeURIComponent(content)}&bn=${encodeURIComponent(BANK_CONFIG.name)}&url=${encodeURIComponent(window.location.href)}`;
 
     closeBankSelector();
 
